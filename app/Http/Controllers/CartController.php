@@ -7,10 +7,19 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
-
-    public function products()
+    // PRODUCTS LIST (SEARCH + PAGINATION)
+    public function products(Request $request)
     {
-        $products = Product::all();
+        $query = Product::query();
+
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+            ->orwhere('description', 'like', '%' . $request->search . '%')
+            ->orwhere('price', 'like', '%' . $request->search . '%');
+        }
+
+        $products = $query->latest()->paginate(4);
+
         return view('products', compact('products'));
     }
 
@@ -21,21 +30,16 @@ class CartController extends Controller
 
     public function store(Request $request)
     {
-        // Validation
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
+            'name' => 'required',
+            'description' => 'required',
             'price' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'image' => 'nullable|image'
         ]);
 
-        $imagePath = null;
-
-        if ($request->hasFile('image')) {
-
-            // store image in storage/app/public/products
-            $imagePath = $request->file('image')->store('products', 'public');
-        }
+        $imagePath = $request->file('image')
+            ? $request->file('image')->store('products', 'public')
+            : null;
 
         Product::create([
             'name' => $request->name,
@@ -47,6 +51,36 @@ class CartController extends Controller
         return redirect('/')->with('success', 'Product Created Successfully');
     }
 
+    // DELETE PRODUCT (NEW)
+    public function delete($id)
+    {
+        Product::findOrFail($id)->delete();
+
+        return back()->with('success', 'Product Deleted Successfully');
+    }
+
+    // EDIT PAGE
+    public function edit($id)
+    {
+        $product = Product::findOrFail($id);
+        return view('edit-product', compact('product'));
+    }
+
+    // UPDATE PRODUCT
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $product->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+        ]);
+
+        return redirect('/')->with('success', 'Product Updated Successfully');
+    }
+
+    // CART FUNCTIONS (same as yours)
     public function addToCart($id)
     {
         $product = Product::findOrFail($id);
@@ -54,11 +88,8 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         if (isset($cart[$id])) {
-
             $cart[$id]['quantity']++;
-
         } else {
-
             $cart[$id] = [
                 "name" => $product->name,
                 "price" => $product->price,
@@ -69,7 +100,7 @@ class CartController extends Controller
 
         session()->put('cart', $cart);
 
-        return redirect()->back()->with('success', 'Product added to cart');
+        return back()->with('success', 'Added to Cart');
     }
 
     public function cart()
@@ -81,13 +112,10 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        if (isset($cart[$request->id])) {
+        unset($cart[$request->id]);
 
-            unset($cart[$request->id]);
+        session()->put('cart', $cart);
 
-            session()->put('cart', $cart);
-        }
-
-        return redirect()->back()->with('success', 'Product removed from cart');
+        return back()->with('success', 'Removed from Cart');
     }
 }
