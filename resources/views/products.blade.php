@@ -28,8 +28,6 @@
             padding: 18px;
         }
 
-        /* HEADER */
-
         .top-header{
             background: white;
             padding: 18px 25px;
@@ -55,8 +53,6 @@
             font-weight: 600;
         }
 
-        /* SEARCH */
-
         .search-box{
             background: white;
             padding: 15px;
@@ -70,7 +66,47 @@
             border-radius: 12px;
         }
 
-        /* PRODUCTS AREA */
+        .body-area{
+            flex: 1;
+            display: flex;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .category-sidebar{
+            width: 220px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.05);
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .category-sidebar h6{
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .category-link{
+            display: block;
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .category-link:hover{
+            background: #f0fdf4;
+        }
+
+        .category-link.active{
+            background: #16a34a;
+            color: white;
+            font-weight: 600;
+        }
 
         .products-section{
             flex: 1;
@@ -81,7 +117,7 @@
 
         .products-grid{
             flex: 1;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .product-card{
@@ -119,7 +155,28 @@
         .product-name{
             font-size: 18px;
             font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .category-tag{
+            display: inline-block;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
             margin-bottom: 8px;
+        }
+
+        .star-rating{
+            color: #f59e0b;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .star-rating .star-empty{
+            color: #d1d5db;
         }
 
         .description{
@@ -140,8 +197,6 @@
             font-weight: 600;
             padding: 10px;
         }
-
-        /* PAGINATION */
 
         .pagination-wrapper{
             padding-top: 12px;
@@ -170,8 +225,6 @@
             color: white;
         }
 
-        /* ALERT */
-
         .alert{
             border-radius: 14px;
         }
@@ -184,7 +237,6 @@
 
 <div class="main-wrapper">
 
-    <!-- HEADER -->
     <div class="top-header">
 
         <div class="d-flex justify-content-between align-items-center">
@@ -223,10 +275,13 @@
 
     </div>
 
-    <!-- SEARCH -->
     <div class="search-box">
 
         <form method="GET">
+
+            @if(request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
 
             <div class="row g-2">
 
@@ -256,7 +311,6 @@
 
     </div>
 
-    <!-- SUCCESS MESSAGE -->
     @if(session('success'))
 
         <div class="alert alert-success alert-dismissible fade show">
@@ -270,104 +324,142 @@
 
     @endif
 
-    <!-- PRODUCTS -->
-    <div class="products-section">
+    <div class="body-area">
 
-        <div class="products-grid">
+        <div class="category-sidebar">
 
-            <div class="row g-3 h-100">
+            <h6>Categories</h6>
 
-                @forelse($products as $product)
+            <a href="{{ request()->fullUrlWithQuery(['category' => null]) }}"
+               class="category-link {{ !request('category') ? 'active' : '' }}">
+                All Products
+            </a>
 
-                <div class="col-lg-3 col-md-4 col-sm-6">
+            @foreach($categories as $category)
 
-                    <div class="card product-card">
+                <a href="{{ request()->fullUrlWithQuery(['category' => $category->id]) }}"
+                   class="category-link {{ request('category') == $category->id ? 'active' : '' }}">
+                    {{ $category->name }}
+                </a>
 
-                        <!-- IMAGE -->
-                        <div class="image-box">
-
-                            @if($product->image)
-
-                                <img src="{{ asset('storage/'.$product->image) }}"
-                                     class="product-image">
-
-                            @else
-
-                                <span class="text-muted">
-                                    No Image
-                                </span>
-
-                            @endif
-
-                        </div>
-
-                        <!-- BODY -->
-                        <div class="card-body d-flex flex-column">
-
-                            <div class="product-name">
-
-                                {{ $product->name }}
-
-                            </div>
-
-                            <div class="description flex-grow-1">
-
-                                {{ $product->description }}
-
-                            </div>
-
-                            <div class="price mb-3 mt-2">
-
-                                ₹{{ number_format($product->price, 2) }}
-
-                            </div>
-
-                            <div class="d-grid gap-2">
-
-                                <a href="/add-to-cart/{{$product->id}}"
-                                   class="btn btn-primary action-btn">
-
-                                    Add To Cart
-
-                                </a>
-
-                                <a href="/edit-product/{{$product->id}}"
-                                   class="btn btn-warning action-btn">
-
-                                    Edit
-
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                @empty
-
-                <div class="col-12">
-
-                    <div class="alert alert-warning text-center p-4">
-
-                        No products found.
-
-                    </div>
-
-                </div>
-
-                @endforelse
-
-            </div>
+            @endforeach
 
         </div>
 
-        <!-- PAGINATION -->
-        <div class="pagination-wrapper d-flex justify-content-center">
+        <div class="products-section">
 
-            {{ $products->onEachSide(1)->links('pagination::bootstrap-5') }}
+            <div class="products-grid">
+
+                <div class="row g-3">
+
+                    @forelse($products as $product)
+
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+
+                        <div class="card product-card">
+
+                            <div class="image-box">
+
+                                @if($product->image)
+
+                                    <img src="{{ asset('storage/'.$product->image) }}"
+                                         class="product-image">
+
+                                @else
+
+                                    <span class="text-muted">
+                                        No Image
+                                    </span>
+
+                                @endif
+
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+
+                                @if($product->category)
+                                    <span class="category-tag">{{ $product->category->name }}</span>
+                                @endif
+
+                                <div class="product-name">
+
+                                    {{ $product->name }}
+
+                                </div>
+
+                                <div class="star-rating">
+
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= round($product->rating))
+                                            ★
+                                        @else
+                                            <span class="star-empty">★</span>
+                                        @endif
+                                    @endfor
+
+                                    <span class="text-muted">({{ number_format($product->rating, 1) }})</span>
+
+                                </div>
+
+                                <div class="description flex-grow-1">
+
+                                    {{ $product->description }}
+
+                                </div>
+
+                                <div class="price mb-3 mt-2">
+
+                                    ₹{{ number_format($product->price, 2) }}
+
+                                </div>
+
+                                <div class="d-grid gap-2">
+
+                                    <a href="/add-to-cart/{{$product->id}}"
+                                       class="btn btn-primary action-btn">
+
+                                        Add To Cart
+
+                                    </a>
+
+                                    <a href="/edit-product/{{$product->id}}"
+                                       class="btn btn-warning action-btn">
+
+                                        Edit
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    @empty
+
+                    <div class="col-12">
+
+                        <div class="alert alert-warning text-center p-4">
+
+                            No products found.
+
+                        </div>
+
+                    </div>
+
+                    @endforelse
+
+                </div>
+
+            </div>
+
+            <div class="pagination-wrapper d-flex justify-content-center">
+
+                {{ $products->onEachSide(1)->links('pagination::bootstrap-5') }}
+
+            </div>
 
         </div>
 
