@@ -64,6 +64,24 @@
 
                     </div>
 
+                    @if($errors->any())
+
+                        <div class="alert alert-danger">
+
+                            <ul class="mb-0">
+
+                                @foreach($errors->all() as $error)
+
+                                    <li>{{ $error }}</li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
                     <form action="/store-product" method="POST" enctype="multipart/form-data">
 
                         @csrf
@@ -84,11 +102,36 @@
 
                         </div>
 
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">Price</label>
+
+                                <input type="number" name="price" class="form-control" placeholder="Enter price">
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">Category</label>
+
+                                <select name="category_id" class="form-control">
+                                    <option value="">Select category</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+
+                            </div>
+
+                        </div>
+
                         <div class="mb-3">
 
-                            <label class="form-label">Price</label>
+                            <label class="form-label">Rating (0 - 5)</label>
 
-                            <input type="number" name="price" class="form-control" placeholder="Enter price">
+                            <input type="number" name="rating" class="form-control" min="0" max="5" step="0.1" placeholder="e.g. 4.5">
 
                         </div>
 
