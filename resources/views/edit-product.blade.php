@@ -73,7 +73,6 @@
 
                 </div>
 
-                <!-- SUCCESS MESSAGE -->
                 @if(session('success'))
 
                     <div class="alert alert-success">
@@ -84,7 +83,6 @@
 
                 @endif
 
-                <!-- VALIDATION ERRORS -->
                 @if($errors->any())
 
                     <div class="alert alert-danger">
@@ -109,7 +107,6 @@
 
                     @csrf
 
-                    <!-- PRODUCT NAME -->
                     <div class="mb-3">
 
                         <label class="form-label">
@@ -126,7 +123,6 @@
 
                     </div>
 
-                    <!-- DESCRIPTION -->
                     <div class="mb-3">
 
                         <label class="form-label">
@@ -142,24 +138,49 @@
 
                     </div>
 
-                    <!-- PRICE -->
-                    <div class="mb-3">
+                    <div class="row">
 
-                        <label class="form-label">
+                        <div class="col-md-6 mb-3">
 
-                            Price
+                            <label class="form-label">
 
-                        </label>
+                                Price
 
-                        <input type="number"
-                               name="price"
-                               class="form-control"
-                               value="{{ $product->price }}"
-                               placeholder="Enter product price">
+                            </label>
+
+                            <input type="number"
+                                   name="price"
+                                   class="form-control"
+                                   value="{{ $product->price }}"
+                                   placeholder="Enter product price">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">Category</label>
+
+                            <select name="category_id" class="form-control">
+                                <option value="">Select category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                        </div>
 
                     </div>
 
-                    <!-- IMAGE -->
+                    <div class="mb-3">
+
+                        <label class="form-label">Rating (0 - 5)</label>
+
+                        <input type="number" name="rating" class="form-control" min="0" max="5" step="0.1" value="{{ $product->rating }}">
+
+                    </div>
+
                     <div class="mb-4">
 
                         <label class="form-label">
@@ -194,7 +215,6 @@
 
                     </div>
 
-                    <!-- BUTTON -->
                     <button class="btn btn-success w-100">
 
                         Update Product

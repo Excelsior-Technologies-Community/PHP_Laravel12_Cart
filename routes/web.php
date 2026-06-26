@@ -16,3 +16,6 @@ Route::get('/delete-product/{id}', [CartController::class, 'delete']);
 Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart']);
 Route::get('/cart', [CartController::class, 'cart']);
 Route::post('/remove-cart', [CartController::class, 'remove']);
+Route::post('/cart/update-quantity', [CartController::class, 'updateQuantity']);
+Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon']);
+Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon']);
